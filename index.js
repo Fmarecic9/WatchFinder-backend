@@ -14,7 +14,7 @@ app.use(cors())
 app.use('/users', userRouter)
 app.use('/watches', watchRouter)
 
-const db = await connectToDatabase()
+
 
 app.listen(PORT,error=>{
     if(error){
