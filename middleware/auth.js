@@ -41,7 +41,7 @@ async function generateJWT(payload) {
 
 async function verifyJWT(token) {
     try {
-        let decoded = jwt.verify(token, jwt_secret_key,{expiresIn: '24h'}); 
+        let decoded = jwt.verify(token, jwt_secret_key,{expiresIn: '2h'}); 
         return decoded;
     } catch (err) {
         console.error(`Error verifying JWT token: ${err}`);
@@ -60,7 +60,7 @@ const authMiddleware = async (req, res, next) => {
     if (!decoded||!decoded.id) {
     return res.status(401).send('Invalid JWT token!');
     }
-    req.authorised_user = decoded; 
+    req.user = decoded; 
     next(); 
     }
     catch(e){
@@ -68,7 +68,13 @@ const authMiddleware = async (req, res, next) => {
     }
     };
 
+const isAdmin =(req,res,next) =>{
+    if (req.user.role != "admin"){
+        return res.status(403).json({ error: "Admin access only" });
+    }
+    next()
+
+}
 
 
-
-export {hashPassword, comparePasswords, authMiddleware, generateJWT, verifyJWT}
+export {hashPassword, comparePasswords, authMiddleware, generateJWT, verifyJWT, isAdmin}

@@ -1,7 +1,7 @@
 import express from 'express'
 import { connectToDatabase } from '../db.js'
 import { ObjectId } from 'mongodb'
-import { authMiddleware } from '../middleware/auth.js'
+import { authMiddleware, isAdmin} from '../middleware/auth.js'
 
 const router = express.Router()
 const db = await connectToDatabase()
@@ -26,8 +26,8 @@ router.get('/:id', async(req,res)=>{
     }
 })
 
-router.post('/',  async (req,res)=>{
-  
+router.post('/',  authMiddleware, isAdmin, async (req,res)=>{
+    
     const {brand, model, price, color, type, materialHousing, materialBracelet, braceletDiameter, length, width, height, weight} = req.body
 
     const newWatch = {
@@ -57,13 +57,7 @@ router.post('/',  async (req,res)=>{
     }
 })
 
-router.delete('/:id', [authMiddleware], async(req,res)=>{
-    let user = req.authorised.user
-    
-    if(!user){
-        return res.status(400).json("Missing user")
-    }
-
+router.delete('/:id', authMiddleware, isAdmin, async(req,res)=>{
     let watchId = req.params.id
 
     try{
@@ -80,13 +74,7 @@ router.delete('/:id', [authMiddleware], async(req,res)=>{
 
 })
 
-router.patch('/:id', [authMiddleware], async (req,res)=>{
-    let user = req.authorised.user
-    
-    if(!user){
-        return res.status(400).json("Missing user")
-    }
-    
+router.patch('/:id', authMiddleware, isAdmin, async (req,res)=>{
     let watchId = req.params.id
     let changes = req.body
 

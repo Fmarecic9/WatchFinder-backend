@@ -21,7 +21,7 @@ router.post('/register', async (req,res)=>{
         username,
         email,
         password: hashedPassword,
-        isAdmin: false
+        role: "user"
     }
 
     try{
@@ -41,7 +41,7 @@ router.post('/login',async (req,res)=>{
     try{
         let foundUser = await userCollection.findOne({username})
         if (!foundUser){
-            res.status(404).json("User not found")
+            return res.status(404).json("User not found")
         }
         	
         let passwordComparison = await comparePasswords(password, foundUser.password)
@@ -49,8 +49,8 @@ router.post('/login',async (req,res)=>{
             return res.status(400).json("User cannot be authentificated")
             
         }
-        let token = await generateJWT({id: foundUser._id, username: foundUser.username})
-        return res.status(200).json({msg: "User is authentificated", user: foundUser.username, jwt: token})
+        let token = await generateJWT({id: foundUser._id, username: foundUser.username, role: foundUser.role})
+        return res.status(200).json({msg: "User is authentificated", user: foundUser.username, role: foundUser.role, jwt: token})
     }   
     catch(e){
         console.error(`Its not good ${e}`)
