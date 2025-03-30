@@ -1,11 +1,12 @@
 import express from 'express'
 import { connectToDatabase } from '../db.js'
-import { hashPassword, comparePasswords } from '../middleware/auth.js';
+import { hashPassword, comparePasswords, generateJWT, verifyJWT, authMiddleware} from '../middleware/auth.js';
 import {body, validationResult} from 'express-validator'
 
 const router = express.Router()
 
 const db = await connectToDatabase();
+const userCollection = db.collection('users')
 
 router.post('/register', async (req,res)=>{
     const {username, email, password } = req.body
@@ -19,11 +20,12 @@ router.post('/register', async (req,res)=>{
     const newUser = {
         username,
         email,
-        password: hashedPassword
+        password: hashedPassword,
+        isAdmin: false
     }
 
     try{
-    let result = await db.collection('users').insertOne(newUser)
+    let result = userCollection.insertOne(newUser)
     res.status(201).json({Result: result, user: newUser.username})
     }
     catch(e){
@@ -37,19 +39,18 @@ router.post('/login',async (req,res)=>{
     const {username, password} = req.body
 
     try{
-        let userCollection =  db.collection('users')
         let foundUser = await userCollection.findOne({username})
         if (!foundUser){
             res.status(404).json("User not found")
         }
         	
         let passwordComparison = await comparePasswords(password, foundUser.password)
-        if (passwordComparison){
-            return res.status(200).json({msg: "User is authentificated", user: "username"})
-        }
-        else{
+        if (passwordComparison === false){
             return res.status(400).json("User cannot be authentificated")
+            
         }
+        let token = await generateJWT({id: foundUser._id, username: foundUser.username})
+        return res.status(200).json({msg: "User is authentificated", user: foundUser.username, jwt: token})
     }   
     catch(e){
         console.error(`Its not good ${e}`)

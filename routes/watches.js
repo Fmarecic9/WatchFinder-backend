@@ -1,24 +1,40 @@
 import express from 'express'
 import { connectToDatabase } from '../db.js'
 import { ObjectId } from 'mongodb'
+import { authMiddleware } from '../middleware/auth.js'
 
 const router = express.Router()
 const db = await connectToDatabase()
 const watchCollection = db.collection('watches')
 
 router.get('/', async (req,res)=>{
-    let ureCollection = db.collection('watches')
-    let watches = await ureCollection.find().toArray()
+    let watches = await watchCollection.find().toArray()
     res.status(200).json(watches)
 })
 
-router.post('/', async (req,res)=>{
-    const {brand, model, color, type, materialHousing, materialBracelet, braceletDiameter, length, width, height, weight} = req.body
+router.get('/:id', async(req,res)=>{
+    let watchId = req.params.id
+    try{
+    let selectedWatch = await watchCollection.findOne({_id: new ObjectId(watchId)})
+    if (!selectedWatch){
+        return res.status(404).json("Watch not found")
+    }
+    return res.status(200).json({watch: selectedWatch})
+    }
+    catch(e){
+        console.error(`Error: ${e}`)
+    }
+})
+
+router.post('/',  async (req,res)=>{
+  
+    const {brand, model, price, color, type, materialHousing, materialBracelet, braceletDiameter, length, width, height, weight} = req.body
 
     const newWatch = {
         _id: new ObjectId,
         brand: brand,
         model: model,
+        price: price,
         color: color,
         type: type,
         materialHousing: materialHousing,
@@ -41,7 +57,13 @@ router.post('/', async (req,res)=>{
     }
 })
 
-router.delete('/:id', async(req,res)=>{
+router.delete('/:id', [authMiddleware], async(req,res)=>{
+    let user = req.authorised.user
+    
+    if(!user){
+        return res.status(400).json("Missing user")
+    }
+
     let watchId = req.params.id
 
     try{
@@ -58,7 +80,13 @@ router.delete('/:id', async(req,res)=>{
 
 })
 
-router.patch('/:id', async (req,res)=>{
+router.patch('/:id', [authMiddleware], async (req,res)=>{
+    let user = req.authorised.user
+    
+    if(!user){
+        return res.status(400).json("Missing user")
+    }
+    
     let watchId = req.params.id
     let changes = req.body
 
