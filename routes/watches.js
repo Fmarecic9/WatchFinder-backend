@@ -65,7 +65,7 @@ router.delete('/:id', authMiddleware, isAdmin, async(req,res)=>{
         if (!watchToDelete){
             return res.status(400).json("Watch cannot be deleted")
         }
-        return res.status(201).json({msg: "Watch deleted", watch: watchId})
+        return res.status(200).json({msg: "Watch deleted", watch: watchId})
     }
     
     catch(e){
@@ -82,8 +82,9 @@ router.patch('/:id', authMiddleware, isAdmin, async (req,res)=>{
         let filter = {_id: new ObjectId(watchId)}
         let update = {$set: changes}
         let result = await watchCollection.updateOne(filter, update)
+        
         if (result.modifiedCount == 0){
-            return res.json({msg: "No changes were made"})
+            return res.status(400).json({msg: "No changes were made"})
         }
         res.status(200).json({ message: 'Watch updated successfully', result })
     }
