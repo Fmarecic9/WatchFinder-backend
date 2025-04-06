@@ -3,6 +3,7 @@ import cors from 'cors'
 import { connectToDatabase } from './db.js'
 import userRouter from './routes/users.js'
 import watchRouter from './routes/watches.js'
+import userProfRouter from './routes/userProfile.js'
 
 const app = express();
 
@@ -13,6 +14,7 @@ app.use(cors())
 
 app.use('/users', userRouter)
 app.use('/watches', watchRouter)
+app.use('/userProfile', userProfRouter)
 
 
 
