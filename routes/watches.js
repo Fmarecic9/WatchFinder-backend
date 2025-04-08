@@ -3,9 +3,11 @@ import { connectToDatabase } from '../db.js'
 import { ObjectId } from 'mongodb'
 import { authMiddleware, isAdmin} from '../middleware/auth.js'
 
+
 const router = express.Router()
 const db = await connectToDatabase()
 const watchCollection = db.collection('watches')
+
 
 router.get('/', async (req,res)=>{
     let watches = await watchCollection.find().toArray()
@@ -27,8 +29,8 @@ router.get('/:id', async(req,res)=>{
 })
 
 router.post('/',  authMiddleware, isAdmin, async (req,res)=>{
-    
-    const {brand, model, price, color, type, materialHousing, materialBracelet, braceletDiameter, length, width, height, weight} = req.body
+    const {brand, model, price, color, type, materialHousing, 
+        materialBracelet, braceletDiameter, weight, dimensions, features, images } = req.body
 
     const newWatch = {
         _id: new ObjectId,
@@ -40,11 +42,12 @@ router.post('/',  authMiddleware, isAdmin, async (req,res)=>{
         materialHousing: materialHousing,
         materialBracelet: materialBracelet,
         braceletDiameter: braceletDiameter, 
-        length: length,
-        width: width,
-        height: height,
-        weight: weight
+        weight: weight,
+        dimensions: dimensions,
+        features: features,
+        images: images
     }
+
     try{
         let result = await watchCollection.insertOne(newWatch)
         if (!result){
