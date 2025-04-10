@@ -10,8 +10,30 @@ const watchCollection = db.collection('watches')
 
 
 router.get('/', async (req,res)=>{
-    let watches = await watchCollection.find().toArray()
+    try{
+    const { brand, color, type, materialHousing, materialBracelet, maxPrice, minPrice } = req.query;
+    const filter = {}
+
+    if(brand) filter.brand = brand
+    if(color) filter.color = color
+    if(type) filter.type = type
+    if(materialHousing) filter.materialHousing = materialHousing
+    if(materialBracelet) filter.materialBracelet = materialBracelet
+
+    
+    if (minPrice || maxPrice){
+        filter.price={}
+        if (minPrice) filter.price.$gte = parseFloat(minPrice);
+        if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
+    }
+
+    let watches = await watchCollection.find(filter).toArray()
     res.status(200).json(watches)
+    }
+
+    catch(e){
+
+    }
 })
 
 router.get('/:id', async(req,res)=>{
