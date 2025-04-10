@@ -52,7 +52,7 @@ router.get('/:id', async(req,res)=>{
 
 router.post('/',  authMiddleware, isAdmin, async (req,res)=>{
     const {brand, model, price, color, type, materialHousing, 
-        materialBracelet, braceletDiameter, weight, dimensions, features, images } = req.body
+        materialBracelet, weight, dimensions, features, images } = req.body
 
     const newWatch = {
         _id: new ObjectId,
@@ -63,7 +63,6 @@ router.post('/',  authMiddleware, isAdmin, async (req,res)=>{
         type: type,
         materialHousing: materialHousing,
         materialBracelet: materialBracelet,
-        braceletDiameter: braceletDiameter, 
         weight: weight,
         dimensions: dimensions,
         features: features,
